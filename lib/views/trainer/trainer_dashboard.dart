@@ -50,3 +50,4 @@ class _TrainerDashboardState extends State<TrainerDashboard> {
     );
   }
 }
+
