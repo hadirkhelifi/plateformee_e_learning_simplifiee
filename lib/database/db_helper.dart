@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/user_model.dart';
+
 class DBHelper {
   static final DBHelper _instance = DBHelper._internal();
   factory DBHelper() => _instance;
@@ -18,28 +19,22 @@ class DBHelper {
     return await openDatabase(
       path,
       version: 1,
-      onCreate: (db, version) {
-        return db.execute(
-          '''
+      onCreate: (db, version) async {
+        await db.execute('''
           CREATE TABLE users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT UNIQUE,
             password TEXT,
             role TEXT
           )
-          '''
-        );
+        ''');
       },
     );
   }
 
   Future<int> insertUser(User user) async {
     final db = await database;
-    return await db.insert('users', {
-      'email': user.email,
-      'password': user.password,
-      'role': user.role,
-    });
+    return await db.insert('users', user.toMap());
   }
 
   Future<User?> getUser(String email, String password) async {
@@ -50,12 +45,20 @@ class DBHelper {
       whereArgs: [email, password],
     );
     if (result.isNotEmpty) {
-      final row = result.first;
-      return User(
-        email: row['email'] as String,
-        password: row['password'] as String,
-        role: row['role'] as String,
-      );
+      return User.fromMap(result.first);
+    }
+    return null;
+  }
+
+  Future<User?> getUserByEmail(String email) async {
+    final db = await database;
+    final result = await db.query(
+      'users',
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+    if (result.isNotEmpty) {
+      return User.fromMap(result.first);
     }
     return null;
   }

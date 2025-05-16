@@ -1,9 +1,22 @@
-import 'package:plateforme_e_learning_simplifiee/models/lesson.dart';
-
 class Module {
   final String id;
   final String title;
-  final List<Lesson> lessons;
 
-  Module({required this.id, required this.title, required this.lessons});
+  Module({
+    required this.id,
+    required this.title,
+  });
+
+  factory Module.fromMap(Map<String, dynamic> map, String id) {
+    return Module(
+      id: id,
+      title: map['title'],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+    };
+  }
 }

@@ -9,10 +9,17 @@ class AuthService {
   }
 
   Future<bool> signup(User user) async {
+    // Vérifier si l’email existe déjà
+    final existingUser = await _dbHelper.getUserByEmail(user.email);
+    if (existingUser != null) {
+      return false; // Email déjà utilisé
+    }
+
     try {
       await _dbHelper.insertUser(user);
       return true;
     } catch (e) {
+      print('Erreur lors de l’inscription : $e');
       return false;
     }
   }
