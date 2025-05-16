@@ -1,14 +1,19 @@
 import '../models/user_model.dart';
+import '../database/db_helper.dart';
 
 class AuthService {
-  // Fake login pour simuler l'auth
+  final DBHelper _dbHelper = DBHelper();
+
   Future<User?> login(String email, String password) async {
-    // tu peux mettre une vraie logique plus tard
-    if (email == "trainer@test.com") {
-      return User(email: email, password: password, role: 'trainer');
-    } else if (email == "learner@test.com") {
-      return User(email: email, password: password, role: 'learner');
+    return await _dbHelper.getUser(email, password);
+  }
+
+  Future<bool> signup(User user) async {
+    try {
+      await _dbHelper.insertUser(user);
+      return true;
+    } catch (e) {
+      return false;
     }
-    return null;
   }
 }

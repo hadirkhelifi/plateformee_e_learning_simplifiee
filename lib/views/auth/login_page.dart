@@ -13,25 +13,39 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _authService = AuthService();
+  final AuthService _authService = AuthService();
 
   void _handleLogin() async {
-    final user = await _authService.login(
-      _emailController.text,
-      _passwordController.text,
-    );
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    final user = await _authService.login(email, password); // Login local avec Sqflite
 
     if (user != null) {
+      // Redirection selon le rôle de l'utilisateur
       if (user.role == 'trainer') {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const TrainerDashboard()));
-      } else {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LearnerDashboard()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const TrainerDashboard()),
+        );
+      } else if (user.role == 'learner') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LearnerDashboard()),
+        );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Identifiants incorrects')),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -49,7 +63,10 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("Se connecter", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Se connecter",
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 20),
                   TextField(
                     controller: _emailController,
